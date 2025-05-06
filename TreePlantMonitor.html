@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TreeGrowth Tracker - Optimized Tree Planting System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .tree-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .growth-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .sidebar.collapsed .sidebar-text {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-green-800 text-white w-64 flex flex-col">
+            <div class="p-4 flex items-center justify-between border-b border-green-700">
+                <div class="flex items-center">
+                    <i class="fas fa-tree text-2xl mr-3"></i>
+                    <span class="sidebar-text text-xl font-bold">TreeGrowth</span>
+                </div>
+                <button id="toggleSidebar" class="text-white focus:outline-none">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <nav class="flex-1 overflow-y-auto p-4">
+                <div class="mb-8">
+                    <h3 class="sidebar-text uppercase text-xs font-semibold text-green-300 mb-3">Monitoring</h3>
+                    <ul>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center p-2 rounded hover:bg-green-700 active-nav">
+                                <i class="fas fa-chart-line mr-3"></i>
+                                <span class="sidebar-text">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center p-2 rounded hover:bg-green-700">
+                                <i class="fas fa-tree mr-3"></i>
+                                <span class="sidebar-text">Tree Catalog</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center p-2 rounded hover:bg-green-700">
+                                <i class="fas fa-map-marked-alt mr-3"></i>
+                                <span class="sidebar-text">Planting Zones</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mb-8">
+                    <h3 class="sidebar-text uppercase text-xs font-semibold text-green-300 mb-3">Data Management</h3>
+                    <ul>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center p-2 rounded hover:bg-green-700">
+                                <i class="fas fa-database mr-3"></i>
+                                <span class="sidebar-text">Growth Records</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center p-2 rounded hover:bg-green-700">
+                                <i class="fas fa-cloud-sun-rain mr-3"></i>
+                                <span class="sidebar-text">Environmental Data</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center p-2 rounded hover:bg-green-700">
+                                <i class="fas fa-flask mr-3"></i>
+                                <span class="sidebar-text">Soil Analysis</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="sidebar-text uppercase text-xs font-semibold text-green-300 mb-3">Analytics</h3>
+                    <ul>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center p-2 rounded hover:bg-green-700">
+                                <i class="fas fa-chart-pie mr-3"></i>
+                                <span class="sidebar-text">Yield Prediction</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center p-2 rounded hover:bg-green-700">
+                                <i class="fas fa-robot mr-3"></i>
+                                <span class="sidebar-text">Growth Models</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center p-2 rounded hover:bg-green-700">
+                                <i class="fas fa-lightbulb mr-3"></i>
+                                <span class="sidebar-text">Optimization Tips</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="p-4 border-t border-green-700">
+                <div class="flex items-center">
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="w-8 h-8 rounded-full mr-2">
+                    <div class="sidebar-text">
+                        <div class="text-sm font-medium">Dr. Botanist</div>
+                        <div class="text-xs text-green-300">Lead Arborist</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">Tree Growth Analytics Dashboard</h1>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Search trees..." class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                    <button class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+            </header>
+
+            <main class="p-6">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Total Trees</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">1,284</h3>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <i class="fas fa-tree text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-green-600 text-sm font-medium">+12.5%</span>
+                            <span class="text-gray-500 text-sm ml-2">vs last year</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Avg Growth Rate</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">28.6 cm/yr</h3>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-green-600 text-sm font-medium">+3.2%</span>
+                            <span class="text-gray-500 text-sm ml-2">optimized</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Projected Yield</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">92%</h3>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <i class="fas fa-seedling text-yellow-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-green-600 text-sm font-medium">+8%</span>
+                            <span class="text-gray-500 text-sm ml-2">efficiency</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Mature in</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">3.2 years</h3>
+                            </div>
+                            <div class="bg-purple-100 p-3 rounded-full">
+                                <i class="fas fa-hourglass-half text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-red-500 text-sm font-medium">-0.8 years</span>
+                            <span class="text-gray-500 text-sm ml-2">vs baseline</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Growth Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 lg:col-span-2">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-lg font-semibold text-gray-800">Annual Growth Comparison</h2>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full">This Year</button>
+                                <button class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">Last Year</button>
+                                <button class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">All Time</button>
+                            </div>
+                        </div>
+                        <canvas id="growthChart" height="250"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-6">Species Performance</h2>
+                        <canvas id="speciesChart" height="250"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tree Data Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-gray-800">Recent Tree Measurements</h2>
+                        <button class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center">
+                            <i class="fas fa-plus mr-2"></i> Add Record
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tree ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Species</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Height</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diameter</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Health</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#TR-4582</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Oak</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5 years</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">4.2 m</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">28 cm</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Excellent</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                        <button class="text-green-600 hover:text-green-900 mr-3"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#TR-7291</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Pine</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3 years</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3.8 m</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">22 cm</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Good</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                        <button class="text-green-600 hover:text-green-900 mr-3"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#TR-1365</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Maple</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">7 years</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5.6 m</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">35 cm</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Excellent</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                        <button class="text-green-600 hover:text-green-900 mr-3"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#TR-8742</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Birch</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2 years</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2.1 m</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15 cm</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Needs Care</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                        <button class="text-green-600 hover:text-green-900 mr-3"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            Showing <span class="font-medium">1</span> to <span class="font-medium">4</span> of <span class="font-medium">124</span> entries
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">Previous</button>
+                            <button class="px-3 py-1 border rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700">1</button>
+                            <button class="px-3 py-1 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">2</button>
+                            <button class="px-3 py-1 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">3</button>
+                            <button class="px-3 py-1 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">Next</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Optimization Recommendations -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-6">Yield Optimization Recommendations</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-green-500 transition-colors">
+                            <div class="flex items-center mb-3">
+                                <div class="bg-blue-100 p-2 rounded-full mr-3">
+                                    <i class="fas fa-water text-blue-600"></i>
+                                </div>
+                                <h3 class="font-medium text-gray-800">Irrigation Adjustment</h3>
+                            </div>
+                            <p class="text-gray-600 text-sm">Increase watering frequency by 15% for oak trees in Zone B based on soil moisture data.</p>
+                            <button class="mt-3 text-sm text-green-600 font-medium hover:text-green-700">Apply Suggestion →</button>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-green-500 transition-colors">
+                            <div class="flex items-center mb-3">
+                                <div class="bg-purple-100 p-2 rounded-full mr-3">
+                                    <i class="fas fa-seedling text-purple-600"></i>
+                                </div>
+                                <h3 class="font-medium text-gray-800">Spacing Optimization</h3>
+                            </div>
+                            <p class="text-gray-600 text-sm">Increase spacing between pine trees by 1.2m to reduce competition for sunlight.</p>
+                            <button class="mt-3 text-sm text-green-600 font-medium hover:text-green-700">Apply Suggestion →</button>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-green-500 transition-colors">
+                            <div class="flex items-center mb-3">
+                                <div class="bg-yellow-100 p-2 rounded-full mr-3">
+                                    <i class="fas fa-flask text-yellow-600"></i>
+                                </div>
+                                <h3 class="font-medium text-gray-800">Fertilizer Blend</h3>
+                            </div>
+                            <p class="text-gray-600 text-sm">Switch to NPK 10-8-12 fertilizer for maple trees to address potassium deficiency.</p>
+                            <button class="mt-3 text-sm text-green-600 font-medium hover:text-green-700">Apply Suggestion →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add New Tree Modal (Hidden by default) -->
+                <div id="addTreeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+                    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Add New Tree Record</h3>
+                        </div>
+                        <div class="p-6">
+                            <form>
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-medium mb-2" for="species">Species</label>
+                                    <select id="species" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                        <option>Oak</option>
+                                        <option>Pine</option>
+                                        <option>Maple</option>
+                                        <option>Birch</option>
+                                        <option>Willow</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-medium mb-2" for="plantingDate">Planting Date</label>
+                                    <input type="date" id="plantingDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-medium mb-2" for="height">Height (cm)</label>
+                                        <input type="number" id="height" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-medium mb-2" for="diameter">Diameter (cm)</label>
+                                        <input type="number" id="diameter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-medium mb-2" for="location">Planting Zone</label>
+                                    <select id="location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                        <option>Zone A - Sunny Slope</option>
+                                        <option>Zone B - Valley Floor</option>
+                                        <option>Zone C - Northern Exposure</option>
+                                        <option>Zone D - Mixed Canopy</option>
+                                    </select>
+                                </div>
+                                <div class="flex justify-end space-x-3 mt-6">
+                                    <button type="button" id="cancelAddTree" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</button>
+                                    <button type="button" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Save Tree</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+        });
+
+        // Show add tree modal
+        document.querySelector('button:contains("Add Record")').addEventListener('click', function() {
+            document.getElementById('addTreeModal').classList.remove('hidden');
+        });
+
+        // Hide add tree modal
+        document.getElementById('cancelAddTree').addEventListener('click', function() {
+            document.getElementById('addTreeModal').classList.add('hidden');
+        });
+
+        // Growth Chart
+        const growthCtx = document.getElementById('growthChart').getContext('2d');
+        const growthChart = new Chart(growthCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [
+                    {
+                        label: 'Current Year',
+                        data: [12, 19, 15, 27, 33, 42, 48, 51, 58, 62, 69, 75],
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Previous Year',
+                        data: [10, 16, 12, 22, 28, 35, 40, 44, 50, 55, 60, 68],
+                        borderColor: '#6B7280',
+                        backgroundColor: 'rgba(107, 114, 128, 0.05)',
+                        borderDash: [5, 5],
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Height (cm)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Species Chart
+        const speciesCtx = document.getElementById('speciesChart').getContext('2d');
+        const speciesChart = new Chart(speciesCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Oak', 'Pine', 'Maple', 'Birch', 'Willow'],
+                datasets: [
+                    {
+                        label: 'Avg Growth Rate (cm/yr)',
+                        data: [28, 32, 25, 20, 35],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(20, 184, 166, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(20, 184, 166, 1)'
+                        ],
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Simulate data updates
+        setInterval(() => {
+            // Update growth chart with new data point
+            const growthData = growthChart.data.datasets[0].data;
+            growthData.push(Math.floor(Math.random() * 10) + growthData[growthData.length - 1]);
+            growthData.shift();
+            growthChart.update();
+        }, 5000);
+    </script>
+</body>
+</html>
